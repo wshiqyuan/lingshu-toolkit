@@ -240,18 +240,21 @@ describe('withResolvers', () => {
 
   describe('降级分支 (Promise.withResolvers 不可用)', () => {
     let originalWithResolvers: typeof Promise.withResolvers | undefined;
-
+    let hadOwnWithResolvers = false;
     beforeEach(() => {
+      hadOwnWithResolvers = Object.hasOwn(Promise, 'withResolvers');
       // 保存原始的 Promise.withResolvers
       originalWithResolvers = Promise.withResolvers;
       // 模拟 Promise.withResolvers 不存在
       (Promise as Partial<typeof Promise>).withResolvers = undefined;
     });
-
     afterEach(() => {
       // 恢复原始的 Promise.withResolvers
-      if (originalWithResolvers) {
-        Promise.withResolvers = originalWithResolvers;
+      if (hadOwnWithResolvers) {
+        Promise.withResolvers = originalWithResolvers!;
+      } else {
+        // biome-ignore lint/performance/noDelete: test
+        delete (Promise as Partial<typeof Promise>).withResolvers;
       }
     });
 

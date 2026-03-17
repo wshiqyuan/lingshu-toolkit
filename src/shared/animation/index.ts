@@ -1,21 +1,19 @@
-import { withResolvers } from '@/shared/with-resolvers';
-import { type Formatter, getNextValueHandler, identity, matchValid, nextTick, noop } from './utils';
+import { $dt, $t, dataHandler } from '@/shared/data-handler';
+import type { AnimationBaseOptions, AnimationOptions, AnimationResult } from './types';
+import {
+  createNextTick,
+  createRunningControllerSignal,
+  getNextValueHandler,
+  identity,
+  matchValid,
+  noop,
+} from './utils';
 
-export interface AnimationOptions {
-  easing?: (time: number) => number;
-  onUpdate?: (value: any) => void;
-  onComplete?: () => void;
+export function* stepAnimation<T>(from: T, to: T, step: number, options: AnimationBaseOptions = {}) {
+  if (!Number.isInteger(step) || step <= 0) {
+    throw new RangeError('step must be a positive integer');
+  }
 
-  parser?: (value: any) => number;
-  formatter?: Formatter;
-}
-
-export function* stepAnimation<T>(
-  from: T,
-  to: T,
-  step: number,
-  options: Omit<AnimationOptions, 'onUpdate' | 'onComplete' | 'easing'> = {},
-) {
   const { parser: valueParser = identity, formatter: valueFormatter = identity } = options;
   const [validFrom, validTo] = matchValid(from, to, valueParser);
 
@@ -27,14 +25,45 @@ export function* stepAnimation<T>(
   }
 }
 
-export async function animation<T>(from: T, to: T, duration: number, options: AnimationOptions = {}) {
-  const [validFrom, validTo] = matchValid(from, to, options.parser || identity);
+const validInfo = $dt({
+  autoStart: $t.boolean(true),
+  easing: $t.function(() => identity),
 
-  const { easing = (time) => time, onUpdate = noop, onComplete = noop, formatter: valueFormatter = identity } = options;
+  onStart: $t.function(() => noop),
+  onStop: $t.function(() => noop),
+  onClear: $t.function(() => noop),
+
+  onUpdate: $t.function(() => noop),
+  onComplete: $t.function(() => noop),
+
+  formatter: $t.function(() => identity),
+  parser: $t.function(() => identity),
+});
+
+export function animation<T>(from: T, to: T, duration: number, options: AnimationOptions = {}): AnimationResult {
+  if (duration <= 0 || !Number.isInteger(duration)) {
+    throw new RangeError('duration must be a positive integer');
+  }
+
+  const validOptions = dataHandler(options, validInfo, { unwrap: true });
+  const [validFrom, validTo] = matchValid(from, to, validOptions.parser);
+
+  const { autoStart, easing, onComplete, onUpdate, formatter: valueFormatter } = validOptions;
   const getNextValue = getNextValueHandler(validFrom, validTo, valueFormatter);
 
-  const startTime = performance.now();
-  const resolvers = withResolvers<void>();
+  let startTime = 0;
+  let hasStarted = false;
+  const rcSignal = createRunningControllerSignal(() => {
+    startTime = performance.now() + startTime;
+    if (!hasStarted) {
+      // 第一次启动：触发原始值并开始动画
+      onUpdate(getNextValue(0) as T);
+      hasStarted = true;
+    }
+    nextTick(tick);
+  }, validOptions);
+  const { resolvers } = rcSignal;
+  const nextTick = createNextTick(resolvers, rcSignal);
 
   const tick = () => {
     const elapsed = performance.now() - startTime;
@@ -42,15 +71,24 @@ export async function animation<T>(from: T, to: T, duration: number, options: An
     const value = getNextValue(progress) as T;
     onUpdate(value);
     if (elapsed < duration) {
-      nextTick(tick);
+      const stopFlag = nextTick(tick);
+      if (stopFlag) {
+        startTime = -elapsed;
+      }
     } else {
-      resolvers.resolve();
       onComplete();
+      resolvers.resolve(false);
     }
   };
 
-  onUpdate(getNextValue(0));
-  nextTick(tick);
+  if (autoStart !== false) {
+    rcSignal.start();
+  }
 
-  return resolvers.promise;
+  return {
+    promise: resolvers.promise,
+    stop: rcSignal.stop,
+    start: rcSignal.start,
+    clear: rcSignal.clear,
+  } as unknown as AnimationResult;
 }

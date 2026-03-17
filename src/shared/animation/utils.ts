@@ -1,3 +1,6 @@
+import { type Resolver, withResolvers } from '@/shared/with-resolvers';
+import type { AnimationOptions } from './types';
+
 export type Formatter = (value: number) => any;
 
 export const noop = () => void 0;
@@ -15,6 +18,9 @@ function getType(_v: any): string {
 
 const baseNextValue = (from: number, to: number) => {
   const { valueFormatter, progress } = context;
+  if (getType(from) !== 'number') {
+    return from;
+  }
   return valueFormatter(from + (to - from) * progress);
 };
 
@@ -97,7 +103,7 @@ export function matchValid(from: any, to: any, valueParser: (value: any) => numb
     for (let i = 0; i < toKeys.length; i++) {
       const key = toKeys[i];
       if (!fromKeys.has(key)) {
-        throw new TypeError('from and to must be the same keys');
+        throw new TypeError(`from does not have this key: ${String(key)}`);
       }
       const [fromItem, toItem] = matchValid(
         (from as Record<PropertyKey, any>)[key],
@@ -115,9 +121,62 @@ export function matchValid(from: any, to: any, valueParser: (value: any) => numb
   return [from as number, to as number];
 }
 
-export const nextTick = (() => {
-  if (typeof globalThis.requestAnimationFrame === 'function') {
-    return globalThis.requestAnimationFrame;
-  }
-  return (callback: FrameRequestCallback) => setTimeout(callback, 16);
-})();
+export function createNextTick(resolvers: Resolver<any>, rcSignal: RCSignal) {
+  const nextTick = (() => {
+    if (typeof globalThis.requestAnimationFrame === 'function') {
+      return globalThis.requestAnimationFrame;
+    }
+    return (callback: FrameRequestCallback) => setTimeout(callback, 16);
+  })();
+
+  return (callback: (...args: any[]) => void) => {
+    if (rcSignal.stopSignal) {
+      return true;
+    }
+    nextTick(() =>
+      tryRun(callback, resolvers, (error: any) => {
+        rcSignal.stop();
+        resolvers.reject(error);
+      }),
+    );
+    return false;
+  };
+}
+
+export async function tryRun(callback: () => any, resolvers: Resolver<any>, customErrorHandler?: (err: any) => void) {
+  return new Promise<void>((resolve, reject) => {
+    const result = callback();
+    if (result && typeof result.then === 'function') {
+      return result.then(resolve, reject);
+    }
+    resolve();
+  }).catch(customErrorHandler || resolvers.reject);
+}
+
+export function createRunningControllerSignal(startFn: () => void, options: Required<AnimationOptions>) {
+  const { onStart, onStop, onClear } = options;
+  const resolvers = withResolvers<boolean>();
+
+  const ctrl = {
+    stopSignal: true,
+    resolvers,
+
+    stop: () => {
+      ctrl.stopSignal = true;
+      onStop();
+    },
+    start: () => {
+      ctrl.stopSignal = false;
+      onStart();
+      startFn();
+    },
+    clear: () => {
+      ctrl.stopSignal = true;
+      onClear();
+      resolvers.resolve(true);
+    },
+  };
+  return ctrl;
+}
+
+export type RCSignal = Omit<ReturnType<typeof createRunningControllerSignal>, 'resolvers'>;

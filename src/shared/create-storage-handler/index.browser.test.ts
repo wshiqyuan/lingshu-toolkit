@@ -1,8 +1,15 @@
-import { describe, expect, test } from 'vitest';
-import { sleep } from '@/test/utils';
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { createStorageHandler } from './index';
 
 describe('createStorage', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   test('导出测试', () => {
     expect(createStorageHandler).toBeTypeOf('function');
   });
@@ -28,7 +35,8 @@ describe('createStorage', () => {
     expect(localStorage.getItem(storageKey)).toBeNull();
     expect(storage.set({ num: 1 })).toBeUndefined();
     expect(localStorage.getItem(storageKey)).toBeNull();
-    await sleep(110);
+    vi.advanceTimersByTime(110);
+    await vi.runAllTimersAsync();
     expect(JSON.parse(localStorage.getItem(storageKey) || '{}')).toEqual({ num: 1 });
     expect(storage.clear()).toBeUndefined();
     expect(localStorage.getItem(storageKey)).toBeNull();

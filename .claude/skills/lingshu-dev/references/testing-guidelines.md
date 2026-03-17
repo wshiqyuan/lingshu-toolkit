@@ -87,44 +87,35 @@ describe('dataHandler', () => {
 ### React Hooks
 
 ```typescript
-import { renderHook, act } from '@vitest/react';
+import { describe, expect, it } from 'vitest';
+import { renderHook } from 'vitest-browser-react';
 import { useToolName } from '@/react/use-tool-name';
 
 describe('useToolName', () => {
-  it('should initialize with default value', () => {
-    const { result } = renderHook(() => useToolName('default'));
-    expect(result.current[0]).toBe('default');
+  const setUp = (defaultValue?: any) => renderHook(() => useToolName(defaultValue));
+
+  it('导出测试', () => {
+    expect(useToolName).toBeTypeOf('function');
   });
 
-  it('should update state when action is called', () => {
-    const { result } = renderHook(() => useToolName('default'));
-    
+  it('方法测试', async () => {
+    const { result, act } = await setUp();
+    expect(result.current[0]).toBe('default');
     act(() => {
       result.current[1].set('new value');
     });
-    
     expect(result.current[0]).toBe('new value');
-  });
-
-  it('should reset to default value', () => {
-    const { result } = renderHook(() => useToolName('default'));
-    
     act(() => {
-      result.current[1].set('new value');
       result.current[1].reset();
     });
-    
     expect(result.current[0]).toBe('default');
   });
 
-  it('should cleanup on unmount', () => {
-    const { unmount } = renderHook(() => useToolName('default'));
-    
-    act(() => {
-      unmount();
-    });
-    
-    // Verify cleanup happened
+  it('默认值测试', async () => {
+    const hook1 = await setUp('custom');
+    expect(hook1.result.current[0]).toBe('custom');
+    const hook2 = await setUp();
+    expect(hook2.result.current[0]).toBe('default');
   });
 });
 ```
@@ -132,30 +123,48 @@ describe('useToolName', () => {
 ### Vue Hooks
 
 ```typescript
-import { mount } from '@vue/test-utils';
+import { describe, expect, it } from 'vitest';
+import { render } from 'vitest-browser-vue';
+import { defineComponent, nextTick, ref } from 'vue';
 import { useToolName } from '@/vue/use-tool-name';
 
 describe('useToolName', () => {
-  it('should initialize with default value', () => {
-    const { state } = useToolName('default');
-    expect(state.value).toBe('default');
+  it('基本使用', async () => {
+    const TestComponent = defineComponent({
+      setup() {
+        const value = useToolName('default');
+        return () => null;
+      },
+    });
+    render(TestComponent);
+    await nextTick();
   });
 
-  it('should update state when method is called', () => {
-    const { state, set } = useToolName('default');
-    
-    set('new value');
-    
-    expect(state.value).toBe('new value');
+  it('响应式更新', async () => {
+    const value = ref('initial');
+    const TestComponent = defineComponent({
+      setup() {
+        useToolName(value);
+        return () => null;
+      },
+    });
+    render(TestComponent);
+    await nextTick();
+    value.value = 'updated';
+    await nextTick();
   });
 
-  it('should reset to default value', () => {
-    const { state, set, reset } = useToolName('default');
-    
-    set('new value');
-    reset();
-    
-    expect(state.value).toBe('default');
+  it('卸载时清理', async () => {
+    const TestComponent = defineComponent({
+      setup() {
+        useToolName('value');
+        return () => null;
+      },
+    });
+    const { unmount } = render(TestComponent);
+    await nextTick();
+    unmount();
+    await nextTick();
   });
 });
 ```
@@ -176,14 +185,14 @@ describe('useToolName', () => {
 - Use `describe` for grouping related scenarios
 
 ### React Hook Testing
-- Use `renderHook` from `@vitest/react`
+- Use `renderHook` from `vitest-browser-react`
 - Wrap state updates in `act()` for React
 - Test both state and actions
 - Test cleanup in `useEffect`
 - Test memoization with `useMemo`
 
 ### Vue Hook Testing
-- Use `@vue/test-utils` for component testing
+- Use `vitest-browser-vue` for component testing
 - Test reactive state changes
 - Test computed properties
 - Test watchers
@@ -220,10 +229,10 @@ pnpm run test:ci --coverage
 
 ## Coverage Goals
 
-- **Statement Coverage**: > 90%
-- **Branch Coverage**: > 85%
-- **Function Coverage**: > 95%
-- **Line Coverage**: > 90%
+- **Statement Coverage**: = 100%
+- **Branch Coverage**: = 100%
+- **Function Coverage**: = 100%
+- **Line Coverage**: = 100%
 
 ## Common Pitfalls
 

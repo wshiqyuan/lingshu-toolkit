@@ -72,7 +72,7 @@ If you prefer not to use a version manager, download and install Node.js 22 dire
 
 When version check fails, use this message:
 
-```
+```text
 ⚠️ **{TESTING|BUILDING} SKIPPED:** Cannot run {tests|build commands} due to Node.js version mismatch.
 
 Current Node.js version: {version}

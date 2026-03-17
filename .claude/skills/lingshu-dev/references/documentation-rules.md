@@ -21,17 +21,17 @@ The script generates this structure automatically:
 
 ```bash title="npm"
 npm i @cmtlyt/lingshu-toolkit
-```
+\```
 
 ```bash title="shadcn"
 npx shadcn@latest add {namespace}{toolName}.json
-```
+\```
 
 ## Usage
 
 ```ts
 import { toolName } from '@cmtlyt/lingshu-toolkit/{namespace}'
-```
+\```
 ```
 
 ### ⚠️ DO NOT Modify Any of the Above Content
@@ -59,13 +59,13 @@ Append all additional documentation to the END of the file:
 
 ```ts
 // Example code
-```
+\```
 
 ### Advanced Usage
 
 ```ts
 // Example code
-```
+\```
 
 ## Notes
 
@@ -113,7 +113,7 @@ import { toolName } from '@cmtlyt/lingshu-toolkit/shared';
 
 const result = toolName('input data');
 console.log(result);
-```
+\```
 
 ### Advanced Usage
 
@@ -125,10 +125,9 @@ const result = toolName('input data', {
   customOption: 'value'
 });
 console.log(result);
-```
+\```
 
 ### With React Hook
-
 ```tsx
 import { useToolName } from '@cmtlyt/lingshu-toolkit/react';
 
@@ -144,7 +143,7 @@ function Component() {
     </div>
   );
 }
-```
+\```
 ```
 
 **Rules:**
@@ -229,7 +228,7 @@ import { processString } from '@cmtlyt/lingshu-toolkit/shared';
 
 const result = processString('hello world');
 // Returns: "HELLO WORLD"
-```
+\```
 
 ### With Options
 
@@ -241,7 +240,7 @@ const result = processString('hello world', {
   trim: true
 });
 // Returns: "hello world"
-```
+\```
 ```
 
 ### React Hook Pattern
@@ -282,7 +281,7 @@ function ToggleButton() {
     </button>
   );
 }
-```
+\```
 ```
 
 ### Vue Hook Pattern
@@ -299,6 +298,7 @@ function ToggleButton() {
 | state | `Ref<T>` | Reactive state reference |
 | set | `(value: T) => void` | Set state to new value |
 | reset | `() => void` | Reset to initial value |
+| toggle | `() => void` | Toggle between two values |
 
 ## Examples
 
@@ -316,7 +316,7 @@ const { state, toggle } = useBoolean(false);
     {{ state ? 'ON' : 'OFF' }}
   </button>
 </template>
-```
+\```
 ```
 
 ## Documentation Checklist

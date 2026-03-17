@@ -47,7 +47,7 @@ export type Result = {
 ### Examples
 - `dataHandler` - Data transformation utilities
 - `conditionMerge` - Conditional object merging
-- `throwError` - Error throwing utilities
+- `throwError` - Error-throwing utilities
 
 ### Best Practices
 - Use TypeScript generics for type flexibility
