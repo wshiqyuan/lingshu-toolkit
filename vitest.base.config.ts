@@ -16,7 +16,7 @@ export default defineConfig({
         'src/**/*.test.{ts,tsx}',
         'src/**/*.{mdx,md}',
         'src/**/*.test-d.{ts,tsx}',
-        'src/test/**',
+        'src/{test,public}/**',
         'src/**/*.test.browser.{ts,tsx}',
       ],
       provider: 'v8',
