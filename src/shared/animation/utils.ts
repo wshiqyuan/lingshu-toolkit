@@ -1,3 +1,4 @@
+import { throwType } from '@/shared/throw-error';
 import { type Resolver, withResolvers } from '@/shared/with-resolvers';
 import type { AnimationOptions } from './types';
 
@@ -7,59 +8,60 @@ export const noop = () => void 0;
 
 export const identity = <T>(_v: T) => _v;
 
-const context = {
-  progress: 0,
-  valueFormatter: identity as Formatter,
-};
-
 function getType(_v: any): string {
   return Object.prototype.toString.call(_v).slice(8, -1).toLowerCase();
 }
 
-const baseNextValue = (from: number, to: number) => {
-  const { valueFormatter, progress } = context;
-  if (getType(from) !== 'number') {
-    return from;
-  }
-  return valueFormatter(from + (to - from) * progress);
-};
-
-const arrayHandler = (from: any, to: any) => {
-  const result: any[] = Array.from(from, (item: any, idx: number) => {
-    if (Array.isArray(item)) {
-      return arrayHandler(item, to[idx]);
-    }
-    if (getType(item) === 'object') {
-      return objectHandler(item, to[idx]);
-    }
-    return baseNextValue(item, to[idx]);
-  });
-  return result;
-};
-
-const objectHandler = (from: any, to: any) => {
-  const result: Record<PropertyKey, any> = {};
-  const keys = Reflect.ownKeys(from);
-
-  for (let i = 0; i < keys.length; i++) {
-    const key = keys[i];
-    const fromValue = from[key];
-    const toValue = to[key];
-
-    if (Array.isArray(from[key])) {
-      result[key] = arrayHandler(fromValue, toValue);
-    } else if (getType(fromValue) === 'object') {
-      result[key] = objectHandler(fromValue, toValue);
-    } else {
-      result[key] = baseNextValue(fromValue, toValue);
-    }
-  }
-
-  return result;
-};
-
 export function getNextValueHandler(from: any, to: any, valueFormatter: Formatter) {
   const type = getType(from);
+
+  // 为每个动画实例创建独立的 context
+  const context = {
+    progress: 0,
+    valueFormatter,
+  };
+
+  const baseNextValue = (_from: number, _to: number) => {
+    const { valueFormatter: formatter, progress } = context;
+    if (getType(_from) !== 'number') {
+      return _from;
+    }
+    return formatter(_from + (_to - _from) * progress);
+  };
+
+  const arrayHandler = (_from: any, _to: any) => {
+    const result: any[] = Array.from(_from, (item: any, idx: number) => {
+      if (Array.isArray(item)) {
+        return arrayHandler(item, _to[idx]);
+      }
+      if (getType(item) === 'object') {
+        return objectHandler(item, _to[idx]);
+      }
+      return baseNextValue(item, _to[idx]);
+    });
+    return result;
+  };
+
+  const objectHandler = (_from: any, _to: any) => {
+    const result: Record<PropertyKey, any> = {};
+    const keys = Reflect.ownKeys(_from);
+
+    for (let i = 0; i < keys.length; i++) {
+      const key = keys[i];
+      const fromValue = _from[key];
+      const toValue = _to[key];
+
+      if (Array.isArray(_from[key])) {
+        result[key] = arrayHandler(fromValue, toValue);
+      } else if (getType(fromValue) === 'object') {
+        result[key] = objectHandler(fromValue, toValue);
+      } else {
+        result[key] = baseNextValue(fromValue, toValue);
+      }
+    }
+
+    return result;
+  };
 
   let nextValueHandler: (_from: any, _to: any) => any = baseNextValue;
 
@@ -71,10 +73,7 @@ export function getNextValueHandler(from: any, to: any, valueFormatter: Formatte
 
   return (progress: number) => {
     context.progress = progress;
-    context.valueFormatter = valueFormatter;
-    const nextValue = nextValueHandler(from, to);
-    context.valueFormatter = identity;
-    return nextValue;
+    return nextValueHandler(from, to);
   };
 }
 
@@ -82,11 +81,11 @@ export function matchValid(from: any, to: any, valueParser: (value: any) => numb
   const fromType = getType(from);
   const toType = getType(to);
   if (fromType !== toType) {
-    throw new TypeError('from and to must be the same type');
+    throwType('animation/stepAnimation', 'from and to must be the same type');
   }
   if (fromType === 'array') {
     if ((from as any[]).length !== (to as any[]).length) {
-      throw new TypeError('from and to must be the same length');
+      throwType('animation/stepAnimation', 'from and to must be the same length');
     }
     const result = [Array.from({ length: (from as any[]).length }), Array.from({ length: (to as any[]).length })];
     for (let i = 0; i < (from as any[]).length; i++) {
@@ -103,7 +102,7 @@ export function matchValid(from: any, to: any, valueParser: (value: any) => numb
     for (let i = 0; i < toKeys.length; i++) {
       const key = toKeys[i];
       if (!fromKeys.has(key)) {
-        throw new TypeError(`from does not have this key: ${String(key)}`);
+        throwType('animation/stepAnimation', `from does not have this key: ${String(key)}`);
       }
       const [fromItem, toItem] = matchValid(
         (from as Record<PropertyKey, any>)[key],

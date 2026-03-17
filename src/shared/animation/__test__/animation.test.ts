@@ -7,6 +7,8 @@ describe('animation', () => {
   });
 
   afterEach(() => {
+    vi.clearAllTimers();
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
@@ -293,5 +295,99 @@ describe('animation', () => {
     vi.advanceTimersByTime(50);
     await vi.runAllTimersAsync();
     expect(onUpdate.mock.calls.length).toBeGreaterThan(callCountAfter50ms);
+  });
+
+  test('多个动画并行执行应该互不影响', async () => {
+    const onUpdate1 = vi.fn();
+    const onUpdate2 = vi.fn();
+    const onUpdate3 = vi.fn();
+
+    // 创建三个不同的动画
+    const anim1 = animation(0, 100, 100, { onUpdate: onUpdate1 });
+    const anim2 = animation(200, 300, 100, { onUpdate: onUpdate2 });
+    const anim3 = animation(0, 1000, 100, { onUpdate: onUpdate3, formatter: (v) => Math.round(v) });
+
+    // 等待所有动画完成
+    vi.advanceTimersByTime(150);
+    await vi.runAllTimersAsync();
+    await Promise.all([anim1.promise, anim2.promise, anim3.promise]);
+
+    // 验证最终值
+    const finalValue1 = onUpdate1.mock.calls[onUpdate1.mock.calls.length - 1][0];
+    const finalValue2 = onUpdate2.mock.calls[onUpdate2.mock.calls.length - 1][0];
+    const finalValue3 = onUpdate3.mock.calls[onUpdate3.mock.calls.length - 1][0];
+
+    expect(finalValue1).toBe(100);
+    expect(finalValue2).toBe(300);
+    expect(finalValue3).toBe(1000);
+
+    // 验证每个动画都调用了多次 onUpdate（说明动画确实在运行）
+    expect(onUpdate1.mock.calls.length).toBeGreaterThan(1);
+    expect(onUpdate2.mock.calls.length).toBeGreaterThan(1);
+    expect(onUpdate3.mock.calls.length).toBeGreaterThan(1);
+
+    // 验证动画1的所有值都在0-100之间
+    onUpdate1.mock.calls.forEach((call) => {
+      const value = call[0];
+      expect(value).toBeGreaterThanOrEqual(0);
+      expect(value).toBeLessThanOrEqual(100);
+    });
+
+    // 验证动画2的所有值都在200-300之间
+    onUpdate2.mock.calls.forEach((call) => {
+      const value = call[0];
+      expect(value).toBeGreaterThanOrEqual(200);
+      expect(value).toBeLessThanOrEqual(300);
+    });
+
+    // 验证动画3的所有值都在0-1000之间
+    onUpdate3.mock.calls.forEach((call) => {
+      const value = call[0];
+      expect(value).toBeGreaterThanOrEqual(0);
+      expect(value).toBeLessThanOrEqual(1000);
+    });
+  });
+
+  test('多个动画并行执行使用不同的formatter应该互不影响', async () => {
+    const onUpdate1 = vi.fn();
+    const onUpdate2 = vi.fn();
+
+    // 创建两个使用不同formatter的动画
+    const anim1 = animation(0, 100, 100, {
+      onUpdate: onUpdate1,
+      formatter: (v) => Math.floor(v / 10) * 10, // 向下取整到10的倍数
+    });
+    const anim2 = animation(0, 100, 100, {
+      onUpdate: onUpdate2,
+      formatter: (v) => Math.ceil(v / 10) * 10, // 向上取整到10的倍数
+    });
+
+    // 等待所有动画完成
+    vi.advanceTimersByTime(150);
+    await vi.runAllTimersAsync();
+    await Promise.all([anim1.promise, anim2.promise]);
+
+    // 验证最终值
+    const finalValue1 = onUpdate1.mock.calls[onUpdate1.mock.calls.length - 1][0];
+    const finalValue2 = onUpdate2.mock.calls[onUpdate2.mock.calls.length - 1][0];
+
+    expect(finalValue1).toBe(100);
+    expect(finalValue2).toBe(100);
+
+    // 验证每个动画都调用了多次 onUpdate（说明动画确实在运行）
+    expect(onUpdate1.mock.calls.length).toBeGreaterThan(1);
+    expect(onUpdate2.mock.calls.length).toBeGreaterThan(1);
+
+    // 验证动画1的所有值都是10的倍数
+    onUpdate1.mock.calls.forEach((call) => {
+      const value = call[0];
+      expect(value % 10).toBe(0);
+    });
+
+    // 验证动画2的所有值都是10的倍数
+    onUpdate2.mock.calls.forEach((call) => {
+      const value = call[0];
+      expect(value % 10).toBe(0);
+    });
   });
 });

@@ -1,4 +1,5 @@
 import { $dt, $t, dataHandler } from '@/shared/data-handler';
+import { throwError } from '@/shared/throw-error';
 import type { AnimationBaseOptions, AnimationOptions, AnimationResult } from './types';
 import {
   createNextTick,
@@ -11,7 +12,7 @@ import {
 
 export function* stepAnimation<T>(from: T, to: T, step: number, options: AnimationBaseOptions = {}) {
   if (!Number.isInteger(step) || step <= 0) {
-    throw new RangeError('step must be a positive integer');
+    throwError('stepAnimation', 'step must be a positive integer', RangeError);
   }
 
   const { parser: valueParser = identity, formatter: valueFormatter = identity } = options;
@@ -42,7 +43,7 @@ const validInfo = $dt({
 
 export function animation<T>(from: T, to: T, duration: number, options: AnimationOptions = {}): AnimationResult {
   if (duration <= 0 || !Number.isInteger(duration)) {
-    throw new RangeError('duration must be a positive integer');
+    throwError('animation', 'duration must be a positive integer', RangeError);
   }
 
   const validOptions = dataHandler(options, validInfo, { unwrap: true });
@@ -90,5 +91,5 @@ export function animation<T>(from: T, to: T, duration: number, options: Animatio
     stop: rcSignal.stop,
     start: rcSignal.start,
     clear: rcSignal.clear,
-  } as unknown as AnimationResult;
+  };
 }

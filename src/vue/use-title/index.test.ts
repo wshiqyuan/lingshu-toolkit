@@ -13,6 +13,8 @@ describe('useTitle', () => {
 
   afterEach(() => {
     document.title = originalTitle;
+    vi.clearAllTimers();
+    vi.useRealTimers();
     vi.restoreAllMocks();
   });
 
