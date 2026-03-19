@@ -1,8 +1,6 @@
 import { throwType } from '@/shared/throw-error';
 import { type Resolver, withResolvers } from '@/shared/with-resolvers';
-import type { AnimationOptions } from './types';
-
-export type Formatter = (value: number) => any;
+import type { AnimationOptions, Formatter } from './types';
 
 export const noop = () => void 0;
 

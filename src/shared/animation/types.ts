@@ -1,4 +1,4 @@
-import type { Formatter } from './utils';
+export type Formatter = (value: number) => any;
 
 export interface AnimationBaseOptions {
   parser?: (value: any) => number;

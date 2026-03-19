@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
+import type { Formatter } from '../types';
 import {
   createNextTick,
   createRunningControllerSignal,
-  type Formatter,
   getNextValueHandler,
   identity,
   matchValid,
