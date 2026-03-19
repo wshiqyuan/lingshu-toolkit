@@ -4,6 +4,9 @@ import vitestBaseConfig from './vitest.base.config';
 export default mergeConfig(
   vitestBaseConfig,
   defineConfig({
-    test: {},
+    test: {
+      include: ['src/**/*.test.{ts,tsx}'],
+      exclude: ['src/{vue,react}/**', 'src/**/*.browser.test.{ts,tsx}'],
+    },
   }),
 );

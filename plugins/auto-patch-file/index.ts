@@ -203,7 +203,7 @@ async function initMetaMap(namespaceInfos: NamespaceInfo[]) {
         metaMap[namespace] = [];
         return;
       }
-      metaMap[namespace] = JSON.parse(await fsp.readFile(metaPath, 'utf-8'));
+      metaMap[namespace] = JSON.parse((await fsp.readFile(metaPath, 'utf-8')).trim() || '[]');
       metaMap[namespace].forEach((item) => {
         docSet.add(item.name);
       });
@@ -320,6 +320,10 @@ async function processHandler(ctx: Context) {
 }
 
 export function pluginAutoPatchFile(options: PluginAutoPatchFileOptions) {
+  if (process.env.gen_file_disabled === 'true') {
+    return { name: '@cmtlyt/lingshu-toolkit:auto-patch-file' } satisfies Plugin;
+  }
+
   const ctx = createContext(options);
 
   void processHandler(ctx);

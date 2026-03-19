@@ -1,8 +1,18 @@
-import { describe, expect, test } from 'vitest';
+import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 import { renderHook } from 'vitest-browser-react';
 import { useTitle } from './index';
 
 describe('useTitle', () => {
+  let originalTitle: string;
+
+  beforeEach(() => {
+    originalTitle = document.title;
+  });
+
+  afterEach(() => {
+    document.title = originalTitle;
+  });
+
   test('导出测试', () => {
     expect(useTitle).toBeTypeOf('function');
   });
@@ -16,7 +26,6 @@ describe('useTitle', () => {
   });
 
   test('不传参数', async () => {
-    const originalTitle = document.title;
     const { result, act } = await renderHook(() => useTitle());
 
     expect(document.title).toBe(originalTitle);
@@ -25,7 +34,6 @@ describe('useTitle', () => {
   });
 
   test('卸载时不恢复标题', async () => {
-    const originalTitle = document.title;
     const { result, act, unmount } = await renderHook(() => useTitle('test', { restoreOnUnmount: false }));
 
     expect(document.title).toBe('test');
@@ -33,7 +41,6 @@ describe('useTitle', () => {
     expect(document.title).toBe('test2');
     unmount();
     expect(document.title).toBe('test2');
-    document.title = originalTitle;
   });
 
   test('参数变更触发标题更新', async () => {
