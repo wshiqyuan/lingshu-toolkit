@@ -7,6 +7,11 @@
       "path": "src/shared/data-handler/index.ts"
     },
     {
+      "name": "sharedDataMixedManager",
+      "author": "cmtlyt",
+      "path": "src/shared/data-mixed-manager/index.ts"
+    },
+    {
       "name": "sharedThrowError",
       "author": "cmtlyt",
       "path": "src/shared/throw-error/index.ts"

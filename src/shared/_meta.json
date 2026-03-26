@@ -33,5 +33,10 @@
     "type": "file",
     "label": "withResolvers",
     "name": "with-resolvers/index.mdx"
+  },
+  {
+    "type": "file",
+    "label": "dataMixedManager",
+    "name": "data-mixed-manager/index.mdx"
   }
 ]
