@@ -58,7 +58,7 @@ class DataMixedManager<T> extends EventTarget {
     try {
       this.initListener(listener);
     } catch (error) {
-      throwError('dataMixedManager', (error as Error).message, (error as any).prototype.constructor);
+      throwError('dataMixedManager', (error as Error).message, (error as Error).constructor as ErrorConstructor);
     }
   }
 

@@ -98,7 +98,6 @@ describe('dataMixedManager - 边界情况', () => {
   });
 
   test('构造函数监听事件不合法, 应报错', () => {
-    // 传入不合法的监听事件，应该直接忽略，不会抛出错误
     expect(() =>
       dataMixedManager<number>({
         listener: {
