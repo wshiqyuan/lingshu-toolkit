@@ -1,25 +1,26 @@
 {
   "$schema": "../plugins/auto-patch-file/schema.json",
   "shared": [
-    { "name": "dataHandler" },
-    { "name": "throwError" },
-    { "name": "types" },
-    { "name": "conditionMerge" },
-    { "name": "createStorageHandler" },
-    { "name": "animation" },
-    { "name": "withResolvers" }
+    { "name": "dataHandler", "author": "cmtlyt" },
+    { "name": "dataMixedManager", "author": "cmtlyt" },
+    { "name": "throwError", "author": "cmtlyt" },
+    { "name": "types", "author": "cmtlyt" },
+    { "name": "conditionMerge", "author": "cmtlyt" },
+    { "name": "createStorageHandler", "author": "cmtlyt" },
+    { "name": "animation", "author": "cmtlyt" },
+    { "name": "withResolvers", "author": "cmtlyt" }
   ],
   "react": [
-    { "name": "useControllableValue" },
-    { "name": "useCounter" },
-    { "name": "useValidData" },
-    { "name": "useToggle" },
-    { "name": "useBoolean" },
-    { "name": "useTitle" },
-    { "name": "useMount" },
-    { "name": "useForceUpdate" },
-    { "name": "useRefState" },
-    { "name": "useStorage" }
+    { "name": "useControllableValue", "author": "cmtlyt" },
+    { "name": "useCounter", "author": "cmtlyt" },
+    { "name": "useValidData", "author": "cmtlyt" },
+    { "name": "useToggle", "author": "cmtlyt" },
+    { "name": "useBoolean", "author": "cmtlyt" },
+    { "name": "useTitle", "author": "cmtlyt" },
+    { "name": "useMount", "author": "cmtlyt" },
+    { "name": "useForceUpdate", "author": "cmtlyt" },
+    { "name": "useRefState", "author": "cmtlyt" },
+    { "name": "useStorage", "author": "cmtlyt" }
   ],
-  "vue": [{ "name": "useTitle" }]
+  "vue": [{ "name": "useTitle", "author": "snailuu" }]
 }

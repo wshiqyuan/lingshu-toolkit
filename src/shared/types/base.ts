@@ -13,3 +13,5 @@ export type IsPrimitive<T> = T extends number | string | boolean | symbol | bigi
 export type IsBasicType<T> = T extends number | string | boolean | symbol | bigint ? true : false;
 
 export type Printify<T> = T extends any[] ? T : [T] extends [never] ? T : { [K in keyof T]: T[K] };
+
+export type PickRequired<T, K extends keyof T> = Printify<Omit<T, K> & Required<Pick<T, K>>>;

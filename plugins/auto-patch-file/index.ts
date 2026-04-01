@@ -76,7 +76,7 @@ function parseTemplate(tempName: string, data: Record<string, any>) {
 function parseInjectData(toolPath: string, namespace: string, tool: ToolMate, ctx: Context) {
   return {
     namespace,
-    name: tool.name,
+    ...tool,
     shadcnPath: `${ctx.registryUrl}/${formatNameFromTool({ meta: tool, namespace })}`,
     npmVersion: ctx.packageJson.version,
     fileName: path.basename(toolPath),
