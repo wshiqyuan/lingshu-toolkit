@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { getError, throwError, throwType } from '.';
+import { createError, throwError, throwType } from '.';
 
 describe('throw-error', () => {
   const prefix = '[@cmtlyt/lingshu-toolkit#test]: ';
@@ -32,7 +32,7 @@ describe('throw-error', () => {
   });
 
   test('获取错误对象', () => {
-    expect(getError('test', 'test')).toBeInstanceOf(Error);
-    expect(getError('test', 'test', TypeError)).toBeInstanceOf(TypeError);
+    expect(createError('test', 'test')).toBeInstanceOf(Error);
+    expect(createError('test', 'test', TypeError)).toBeInstanceOf(TypeError);
   });
 });

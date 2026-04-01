@@ -1,9 +1,9 @@
-export function getError(fnName: string, message: string, ErrorClass = Error): Error {
+export function createError(fnName: string, message: string, ErrorClass = Error): Error {
   return new ErrorClass(`[@cmtlyt/lingshu-toolkit#${fnName}]: ${message}`);
 }
 
 export function throwError(fnName: string, message: string, ErrorClass = Error): never {
-  throw getError(fnName, message, ErrorClass);
+  throw createError(fnName, message, ErrorClass);
 }
 
 export function throwType(fnName: string, message: string): never {

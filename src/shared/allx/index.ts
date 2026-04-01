@@ -1,4 +1,4 @@
-import { getError } from '@/shared/throw-error';
+import { createError } from '@/shared/throw-error';
 import type { AnyFunc } from '@/shared/types/base';
 import { withResolvers } from '@/shared/with-resolvers';
 
@@ -39,7 +39,7 @@ function createDepProxy(tasks: Record<string, AnyFunc>, results: Record<string, 
     {
       async get(_, depName: string) {
         if (!taskNameSet.has(depName)) {
-          return Promise.reject(getError('allx', `Unknown task "${String(depName)}"`));
+          return Promise.reject(createError('allx', `Unknown task "${String(depName)}"`));
         }
         if (results[depName]) {
           if ((options || {}).allSettled) {
