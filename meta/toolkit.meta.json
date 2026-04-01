@@ -8,7 +8,8 @@
     { "name": "conditionMerge", "author": "cmtlyt" },
     { "name": "createStorageHandler", "author": "cmtlyt" },
     { "name": "animation", "author": "cmtlyt" },
-    { "name": "withResolvers", "author": "cmtlyt" }
+    { "name": "withResolvers", "author": "cmtlyt" },
+    { "name": "allx", "author": "cmtlyt" }
   ],
   "react": [
     { "name": "useControllableValue", "author": "cmtlyt" },

@@ -1,3 +1,4 @@
+export * from './allx';
 export * from './animation';
 export * from './condition-merge';
 export * from './create-storage-handler';

@@ -38,5 +38,10 @@
     "type": "file",
     "label": "dataMixedManager",
     "name": "data-mixed-manager/index.mdx"
+  },
+  {
+    "type": "file",
+    "label": "allx",
+    "name": "allx/index.mdx"
   }
 ]
