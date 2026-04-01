@@ -58,12 +58,22 @@ Before writing any documentation:
 - Identify key features and use cases
 - Note any TypeScript types
 
+**Read the test file ⚠️ CRITICAL:**
+- Find and read the corresponding test file (usually `src/**/__tests__/*.test.ts` or `src/**/*.test.ts`)
+- Analyze test assertions to understand expected behavior
+- Extract usage patterns from test cases
+- **Code examples in documentation must match test assertions**
+- Use test cases as the source of truth for expected behavior
+
 **Example:**
 ```
 User: "Write docs for allx tool"
 → Read src/shared/allx/index.ts
+→ Read src/shared/allx/__tests__/allx.test.ts (or similar)
 → Identify namespace: shared
 → Understand: Promise.all enhancement with dependency resolution
+→ Extract usage patterns from test assertions
+→ Ensure examples match test expectations
 ```
 
 ## Step 2: Determine Document Type
@@ -155,6 +165,15 @@ npx shadcn@latest add https://cmtlyt.github.io/lingshu-toolkit/r/namespaceToolNa
 - Multiple real-world scenarios
 - Each example with clear title
 
+**⚠️ CRITICAL: Generate examples from test files**
+- Read the corresponding test file for the tool/hook
+- Extract usage patterns from test cases
+- Ensure examples match test assertions exactly
+- Use test assertions as the source of truth for expected behavior
+- If test shows `expect(func(arg)).toBe(42)`, the example must show `func(arg) // 42`
+- Document edge cases that are tested
+- Include error handling examples if tests cover error scenarios
+
 **Code example format:**
 ```tsx/ts
 // Brief comment explaining what this does
@@ -203,6 +222,8 @@ Before creating the file, verify:
 - Code examples should be runnable
 - No placeholder comments (TODO, FIXME)
 - Imports are correct
+- **Examples must match test assertions**
+- **Expected outputs must align with test expectations**
 
 ### 5.3 Required Sections
 - [ ] Title and metadata
@@ -259,6 +280,9 @@ Fix any formatting issues before completing.
 - Mix Chinese and English in the same document
 - Forget to check lint errors
 - Write vague descriptions like "A tool for X"
+- **Generate examples without reading the test file**
+- **Create examples that contradict test assertions**
+- **Guess expected behavior — use tests as source of truth**
 
 ### ✅ DO:
 
@@ -269,6 +293,9 @@ Fix any formatting issues before completing.
 - Check for lint errors
 - Be specific in descriptions
 - Include real-world use cases
+- **Read the test file before generating examples**
+- **Match examples to test assertions exactly**
+- **Use test cases as source of truth for behavior**
 
 ## Writing Principles
 
@@ -284,6 +311,9 @@ Fix any formatting issues before completing.
 Before marking the task complete:
 
 - [ ] Source code has been read and understood
+- [ ] Test file has been read and analyzed ⚠️ REQUIRED
+- [ ] Examples match test assertions ⚠️ REQUIRED
+- [ ] Expected outputs align with test expectations ⚠️ REQUIRED
 - [ ] Correct file path determined
 - [ ] All required sections present
 - [ ] TypeScript types are correct
