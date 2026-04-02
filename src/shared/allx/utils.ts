@@ -9,8 +9,9 @@ import type { AllxOptions } from './types';
 function detectCycle(from: PropertyKey, to: PropertyKey, waitingForGraph: Map<PropertyKey, Set<PropertyKey>>): boolean {
   const visited = new Set<PropertyKey>();
   const queue = [to];
+  let head = 0;
   while (queue.length > 0) {
-    const node = queue.shift()!;
+    const node = queue[head++];
     if (node === from) {
       return true;
     }
