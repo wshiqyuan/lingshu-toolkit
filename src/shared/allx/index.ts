@@ -1,31 +1,30 @@
+import { $dt, $t, dataHandler } from '@/shared/data-handler';
 import { createError } from '@/shared/throw-error';
 import type { AnyFunc } from '@/shared/types/base';
-import { isFunction, isPromise } from '@/shared/utils/verify';
+import { isFunction, isPromiseLike } from '@/shared/utils/verify';
 import { withResolvers } from '@/shared/with-resolvers';
 
 interface AllxOptions {
   allSettled?: boolean;
 }
 
-interface AllxContext<M extends Record<string, AnyFunc>> {
-  $: {
-    [P in keyof M]: M[P] extends AnyFunc
-      ? ReturnType<M[P]> extends Promise<infer R>
-        ? Promise<R>
-        : Promise<ReturnType<M[P]>>
-      : Promise<Awaited<M[P]>>;
-  };
+type AllxTaskValue<T> = T extends AnyFunc ? Awaited<ReturnType<T>> : Awaited<T>;
+
+interface AllxContext<M extends Record<PropertyKey, AnyFunc>> {
+  $: { [P in keyof M]: Promise<AllxTaskValue<M[P]>> };
 }
 
-type AllxResult<M extends Record<string, AnyFunc>, O extends AllxOptions = AllxOptions> = {
-  [P in keyof M]: O['allSettled'] extends true
-    ? PromiseSettledResult<Awaited<ReturnType<M[P]>>>
-    : Awaited<ReturnType<M[P]>>;
+type AllxResult<M extends Record<PropertyKey, AnyFunc>, O extends AllxOptions = AllxOptions> = {
+  [P in keyof M]: O['allSettled'] extends true ? PromiseSettledResult<Awaited<ReturnType<M[P]>>> : AllxTaskValue<M[P]>;
 };
 
-function createDepProxy(tasks: Record<string, AnyFunc>, results: Record<string, any>, options?: AllxOptions) {
-  const resolverMap = new Map<string, PromiseWithResolvers<any>>();
-  const taskNameSet = new Set(Reflect.ownKeys(tasks) as string[]);
+function createDepProxy(
+  tasks: Record<PropertyKey, AnyFunc>,
+  results: Record<PropertyKey, any>,
+  options: Required<AllxOptions>,
+) {
+  const resolverMap = new Map<PropertyKey, PromiseWithResolvers<any>>();
+  const taskNameSet = new Set(Reflect.ownKeys(tasks) as PropertyKey[]);
 
   const depProxy = new Proxy(
     {},
@@ -34,11 +33,12 @@ function createDepProxy(tasks: Record<string, AnyFunc>, results: Record<string, 
         if (!taskNameSet.has(depName)) {
           return Promise.reject(createError('allx', `Unknown task "${String(depName)}"`));
         }
-        if (results[depName]) {
-          if ((options || {}).allSettled) {
-            return Promise.resolve(results[depName].value);
+        if (Reflect.getOwnPropertyDescriptor(results, depName)) {
+          const cached = results[depName];
+          if (options.allSettled) {
+            return cached.status === 'rejected' ? Promise.reject(cached.reason) : Promise.resolve(cached.value);
           }
-          return Promise.resolve(results[depName]);
+          return Promise.resolve(cached);
         }
         const depResolvers = resolverMap.get(depName);
         if (depResolvers) {
@@ -77,6 +77,10 @@ function getValueFormatFunc(options?: AllxOptions) {
   return (value: any, _type: PromiseSettledResult<any>['status'] = 'fulfilled') => value;
 }
 
+const validInfo = $dt({
+  allSettled: $t.boolean(false),
+});
+
 /**
  * 支持自动依赖优化和完整类型推断的 Promise.all, 执行任务时自动解决依赖关系。
  *
@@ -88,13 +92,14 @@ function getValueFormatFunc(options?: AllxOptions) {
  *   async c() { return (await this.$.a) + 10 }
  * })
  */
-export async function allx<M extends Record<string, any>, O extends AllxOptions>(
+export async function allx<M extends Record<PropertyKey, any>, O extends AllxOptions>(
   tasks: M & ThisType<AllxContext<M>>,
   options?: O,
 ): Promise<AllxResult<M, O>> {
-  const { allSettled } = options || {};
-  const results: Record<string, any> = {};
-  const { depProxy, taskNameSet, resolverMap } = createDepProxy(tasks, results, options);
+  const validOptions = dataHandler(options || {}, validInfo, { unwrap: true });
+  const { allSettled } = validOptions;
+  const results: Record<PropertyKey, any> = {};
+  const { depProxy, taskNameSet, resolverMap } = createDepProxy(tasks, results, validOptions);
   const valueFormat = getValueFormatFunc(options);
 
   const context = {
@@ -129,7 +134,7 @@ export async function allx<M extends Record<string, any>, O extends AllxOptions>
 
     promises.push(taskResolvers.promise);
 
-    if (isPromise(taskFn)) {
+    if (isPromiseLike(taskFn)) {
       await taskFn.then(taskResolvers.resolve, taskResolvers.reject);
       return;
     }

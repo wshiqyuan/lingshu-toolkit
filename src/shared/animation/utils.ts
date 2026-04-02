@@ -1,9 +1,9 @@
 import { throwType } from '@/shared/throw-error';
 import { getType } from '@/shared/utils/base';
 import { type Resolver, withResolvers } from '@/shared/with-resolvers';
-import type { AnimationOptions, Formatter } from './types';
+import type { AnimationOptions, FormatterValue } from './types';
 
-export function getNextValueHandler(from: any, to: any, valueFormatter: Formatter) {
+export function getNextValueHandler<T>(from: T, to: T, valueFormatter: FormatterValue) {
   const type = getType(from);
 
   // 为每个动画实例创建独立的 context
@@ -143,7 +143,7 @@ export async function tryRun(callback: () => any, resolvers: Resolver<any>, cust
   }).catch(customErrorHandler || resolvers.reject);
 }
 
-export function createRunningControllerSignal(startFn: () => void, options: Required<AnimationOptions>) {
+export function createRunningControllerSignal(startFn: () => void, options: Required<AnimationOptions<any>>) {
   const { onStart, onStop, onClear } = options;
   const resolvers = withResolvers<boolean>();
 

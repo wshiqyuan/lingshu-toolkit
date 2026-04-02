@@ -60,13 +60,13 @@ function App() {
 
 ### 自定义默认值
 
-使用自定义的默认值，反向值会自动取反：
+使用自定义值时，建议同时传入左右值，确保状态类型稳定：
 
 ```tsx
 import { useToggle } from '@cmtlyt/lingshu-toolkit/react'
 
 function App() {
-  const [status, { toggle }] = useToggle('loading')
+  const [status, { toggle }] = useToggle('loading', 'loaded')
 
   return (
     <div>

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { identity } from '@/shared/utils';
-import type { Formatter } from '../types';
+import type { FormatterValue } from '../types';
 import { createNextTick, createRunningControllerSignal, getNextValueHandler, matchValid, tryRun } from '../utils';
 
 describe('utils', () => {
@@ -16,14 +16,14 @@ describe('utils', () => {
 
   describe('getNextValueHandler', () => {
     test('应该处理数字类型', () => {
-      const handler = getNextValueHandler(0, 100, identity as Formatter);
+      const handler = getNextValueHandler(0, 100, identity as FormatterValue);
       expect(handler(0)).toBe(0);
       expect(handler(0.5)).toBe(50);
       expect(handler(1)).toBe(100);
     });
 
     test('应该处理数组类型', () => {
-      const handler = getNextValueHandler([0, 0], [100, 200], identity as Formatter);
+      const handler = getNextValueHandler([0, 0], [100, 200], identity as FormatterValue);
       expect(handler(0)).toEqual([0, 0]);
       expect(handler(0.5)).toEqual([50, 100]);
       expect(handler(1)).toEqual([100, 200]);
@@ -39,7 +39,7 @@ describe('utils', () => {
           [100, 200],
           [110, 210],
         ],
-        identity as Formatter,
+        identity as FormatterValue,
       );
       expect(handler(0)).toEqual([
         [0, 0],
@@ -56,21 +56,25 @@ describe('utils', () => {
     });
 
     test('应该处理对象类型', () => {
-      const handler = getNextValueHandler({ x: 0, y: 0 }, { x: 100, y: 200 }, identity as Formatter);
+      const handler = getNextValueHandler({ x: 0, y: 0 }, { x: 100, y: 200 }, identity as FormatterValue);
       expect(handler(0)).toEqual({ x: 0, y: 0 });
       expect(handler(0.5)).toEqual({ x: 50, y: 100 });
       expect(handler(1)).toEqual({ x: 100, y: 200 });
     });
 
     test('应该正确处理嵌套对象', () => {
-      const handler = getNextValueHandler({ pos: { x: 0, y: 0 } }, { pos: { x: 100, y: 200 } }, identity as Formatter);
+      const handler = getNextValueHandler(
+        { pos: { x: 0, y: 0 } },
+        { pos: { x: 100, y: 200 } },
+        identity as FormatterValue,
+      );
       expect(handler(0)).toEqual({ pos: { x: 0, y: 0 } });
       expect(handler(0.5)).toEqual({ pos: { x: 50, y: 100 } });
       expect(handler(1)).toEqual({ pos: { x: 100, y: 200 } });
     });
 
     test('应该处理对象中包含数组的属性', () => {
-      const handler = getNextValueHandler({ values: [0, 10] }, { values: [100, 110] }, identity as Formatter);
+      const handler = getNextValueHandler({ values: [0, 10] }, { values: [100, 110] }, identity as FormatterValue);
       expect(handler(0)).toEqual({ values: [0, 10] });
       expect(handler(0.5)).toEqual({ values: [50, 60] });
       expect(handler(1)).toEqual({ values: [100, 110] });
@@ -84,7 +88,7 @@ describe('utils', () => {
     });
 
     test('应该正确处理混合类型的数组，只更新数字', () => {
-      const handler = getNextValueHandler(['solid', 1, '#000'], ['solid', 5, '#000'], identity as Formatter);
+      const handler = getNextValueHandler(['solid', 1, '#000'], ['solid', 5, '#000'], identity as FormatterValue);
       expect(handler(0)).toEqual(['solid', 1, '#000']);
       expect(handler(0.5)).toEqual(['solid', 3, '#000']);
       expect(handler(1)).toEqual(['solid', 5, '#000']);
@@ -100,7 +104,7 @@ describe('utils', () => {
           { x: 100, y: 200 },
           { x: 110, y: 210 },
         ],
-        identity as Formatter,
+        identity as FormatterValue,
       );
       expect(handler(0)).toEqual([
         { x: 0, y: 0 },
@@ -320,6 +324,7 @@ describe('utils', () => {
         onUpdate: vi.fn(),
         onComplete: vi.fn(),
         formatter: identity,
+        formatterValue: identity,
         parser: identity,
       };
       const ctrl = createRunningControllerSignal(startFn, options);
@@ -342,6 +347,7 @@ describe('utils', () => {
         onUpdate: vi.fn(),
         onComplete: vi.fn(),
         formatter: identity,
+        formatterValue: identity,
         parser: identity,
       };
       const ctrl = createRunningControllerSignal(startFn, options);
@@ -361,6 +367,7 @@ describe('utils', () => {
         onUpdate: vi.fn(),
         onComplete: vi.fn(),
         formatter: identity,
+        formatterValue: identity,
         parser: identity,
       };
       const ctrl = createRunningControllerSignal(startFn, options);
@@ -382,6 +389,7 @@ describe('utils', () => {
         onUpdate: vi.fn(),
         onComplete: vi.fn(),
         formatter: identity,
+        formatterValue: identity,
         parser: identity,
       };
       const ctrl = createRunningControllerSignal(startFn, options);

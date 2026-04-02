@@ -164,7 +164,7 @@ import { useTitle } from '@cmtlyt/lingshu-toolkit/vue/use-title';
 const childTitle = useTitle('子组件标题');
 
 // 当子组件卸载时，如果 restoreOnUnmount 为 true（默认），
-// 标题会恢复为"父组件标题"
+// 恢复为调用时捕获的标题, 此用例中为 “父组件标题”
 ```
 
 ### 标题模板

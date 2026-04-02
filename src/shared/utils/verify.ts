@@ -114,7 +114,6 @@ export function isFunction(_v: unknown): _v is AnyFunc {
 }
 
 /** 判断是一个 Promise */
-export function isPromise(_v: unknown): _v is Promise<any> {
-  // @ts-expect-error
-  return isObject(_v) && isFunction(_v.then);
+export function isPromiseLike(_v: unknown): _v is PromiseLike<any> {
+  return isObject(_v) && isFunction((_v as PromiseLike<any>).then);
 }

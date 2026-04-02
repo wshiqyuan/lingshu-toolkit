@@ -15,7 +15,7 @@ import {
   isPlainNumber,
   isPlainObject,
   isPlainSymbol,
-  isPromise,
+  isPromiseLike,
   isPropertyKey,
   isString,
   isSymbol,
@@ -26,7 +26,7 @@ import {
 
 describe('utils-verify', () => {
   test('导出检查', () => {
-    expect(isPromise).toBeTypeOf('function');
+    expect(isPromiseLike).toBeTypeOf('function');
     expect(isObject).toBeTypeOf('function');
     expect(isArray).toBeTypeOf('function');
     expect(isEmptyArray).toBeTypeOf('function');
@@ -51,16 +51,16 @@ describe('utils-verify', () => {
   });
 
   test('isPromise', () => {
-    expect(isPromise(Promise.resolve())).toBe(true);
-    expect(isPromise(1)).toBe(false);
-    expect(isPromise(Promise.reject().catch(() => {}))).toBe(true);
-    expect(isPromise('1')).toBe(false);
-    expect(isPromise(Symbol('test'))).toBe(false);
-    expect(isPromise({})).toBe(false);
-    expect(isPromise([])).toBe(false);
-    expect(isPromise(new Promise(() => {}))).toBe(true);
+    expect(isPromiseLike(Promise.resolve())).toBe(true);
+    expect(isPromiseLike(1)).toBe(false);
+    expect(isPromiseLike(Promise.reject().catch(() => {}))).toBe(true);
+    expect(isPromiseLike('1')).toBe(false);
+    expect(isPromiseLike(Symbol('test'))).toBe(false);
+    expect(isPromiseLike({})).toBe(false);
+    expect(isPromiseLike([])).toBe(false);
+    expect(isPromiseLike(new Promise(() => {}))).toBe(true);
     // biome-ignore lint/suspicious/noThenProperty: test
-    expect(isPromise({ then: () => {} })).toBe(true);
+    expect(isPromiseLike({ then: () => {} })).toBe(true);
   });
 
   test('isFunction', () => {

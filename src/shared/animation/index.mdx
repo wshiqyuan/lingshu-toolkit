@@ -184,13 +184,20 @@ const anim = animation(0, 100, 1000, {
 const anim = animation('0px', '100px', 1000, {
   // 解析输入值为数值
   parser: (value) => Number.parseInt(value, 10),
-  // 格式化输出值
-  formatter: (value) => `${Math.round(value)}px`,
+  // 格式化数值（在插值计算后、最终格式化前）
+  formatterValue: (value) => Math.round(value),
+  // 格式化最终输出值
+  formatter: (value) => `${value}px`,
   onUpdate: (value) => {
     console.log(value); // "0px" -> "100px"
   },
 });
 ```
+
+**说明：**
+- `formatterValue`：对插值计算后的数值进行格式化，如果和 `formatter` 同用建议返回数值类型
+- `formatter`：对 formatterValue 处理后的值进行最终格式化，可以返回任意类型
+- 如果只需要一次格式化，可以只使用 `formatter`，省略 `formatterValue`
 
 ### 嵌套数据结构
 
@@ -288,8 +295,10 @@ const objValues = Array.from(objGen);
     - 动画完成时的回调
   - **parser?**: `(value: any) => number`
     - 解析函数，将输入值转换为数值
-  - **formatter?**: `(value: number) => any`
-    - 格式化函数，将数值转换为输出值
+  - **formatterValue?**: `(value: number) => any`
+    - 数值格式化函数，对插值计算后的数值进行格式化
+  - **formatter?**: `(value: T) => any`
+    - 最终格式化函数，对 formatterValue 处理后的值进行二次格式化
 
 #### 返回值
 
@@ -306,7 +315,7 @@ const objValues = Array.from(objGen);
 #### 类型定义
 
 ```ts
-interface AnimationOptions {
+interface AnimationOptions<T> {
   autoStart?: boolean;
   easing?: (time: number) => number;
   onStart?: () => void;
@@ -315,7 +324,8 @@ interface AnimationOptions {
   onUpdate?: (value: any) => void;
   onComplete?: () => void;
   parser?: (value: any) => number;
-  formatter?: (value: number) => any;
+  formatterValue?: (value: number) => any;
+  formatter?: (value: T) => any;
 }
 
 interface AnimationResult {
@@ -341,8 +351,10 @@ interface AnimationResult {
 - **options?**: `AnimationBaseOptions`
   - **parser?**: `(value: any) => number`
     - 解析函数
-  - **formatter?**: `(value: number) => any`
-    - 格式化函数
+  - **formatterValue?**: `(value: number) => any`
+    - 数值格式化函数，对插值计算后的数值进行格式化
+  - **formatter?**: `(value: T) => any`
+    - 最终格式化函数，对 formatterValue 处理后的值进行二次格式化
 
 #### 返回值
 
@@ -357,7 +369,8 @@ interface AnimationResult {
 const counter = document.getElementById('counter');
 
 const anim = animation(0, 1000, 2000, {
-  formatter: (value) => Math.round(value).toLocaleString(),
+  formatterValue: (value) => Math.round(value),
+  formatter: (value) => value.toLocaleString(),
   onUpdate: (value) => {
     counter.textContent = value;
   },
@@ -370,7 +383,8 @@ const anim = animation(0, 1000, 2000, {
 const progressBar = document.getElementById('progress-bar');
 
 const anim = animation(0, 100, 3000, {
-  formatter: (value) => `${Math.round(value)}%`,
+  formatterValue: (value) => Math.round(value),
+  formatter: (value) => `${value}%`,
   onUpdate: (value) => {
     progressBar.style.width = value;
   },
@@ -402,9 +416,10 @@ const anim = animation(
   { r: 0, g: 255, b: 0 },
   2000,
   {
+    formatterValue: (value) => Math.round(value),
     formatter: (value) => {
       const { r, g, b } = value;
-      return `rgb(${Math.round(r)}, ${Math.round(g)}, ${Math.round(b)})`;
+      return `rgb(${r}, ${g}, ${b})`;
     },
     onUpdate: (color) => {
       element.style.backgroundColor = color;
@@ -498,21 +513,29 @@ const fastOutAnim = animation(0, 100, 1000, {
 });
 ```
 
-### 4. 使用 formatter 格式化输出
+### 4. 使用 formatterValue 和 formatter 格式化输出
 
 确保输出值符合预期格式：
 
 ```ts
 const anim = animation(0, 100, 1000, {
-  formatter: (value) => {
+  // 先对数值进行格式化
+  formatterValue: (value) => {
     // 四舍五入到整数
     return Math.round(value);
+  },
+  // 再对格式化后的值进行二次格式化
+  formatter: (value) => {
+    // 转换为字符串
+    return `${value}px`;
   },
   onUpdate: (value) => {
     element.textContent = value;
   },
 });
 ```
+
+**提示：** 如果只需要一次格式化，可以只使用 `formatter`，省略 `formatterValue`。
 
 ## 注意事项
 
@@ -524,3 +547,4 @@ const anim = animation(0, 100, 1000, {
 6. **clear() 会立即停止动画**：clear() 方法会立即停止动画并 resolve promise，不会触发 onComplete 回调
 7. **requestAnimationFrame 降级**：在不支持 requestAnimationFrame 的环境中，会降级使用 setTimeout（16ms 间隔）
 8. **暂停恢复的时间准确性**：暂停和恢复功能会保持时间的准确性，不会因为暂停时间而影响动画进度
+9. **formatter**: formatterValue 是对每个值进行格式化, formatter 是对这一帧的完整计算结果进行格式化
