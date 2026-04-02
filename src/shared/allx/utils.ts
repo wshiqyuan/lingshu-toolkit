@@ -65,12 +65,12 @@ function createDepResolver(
 
 function cleanWaitingForGraph(waitingForGraph: Map<PropertyKey, Set<PropertyKey>>, depName: PropertyKey) {
   // 清理等待图中以 depName 为目标的所有边
-  for (const [task, deps] of waitingForGraph) {
+  waitingForGraph.forEach((deps, task) => {
     deps.delete(depName);
     if (deps.size === 0) {
       waitingForGraph.delete(task);
     }
-  }
+  });
 }
 
 export function createDepProxy(
