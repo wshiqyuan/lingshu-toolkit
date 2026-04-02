@@ -10,7 +10,7 @@ function detectCycle(from: PropertyKey, to: PropertyKey, waitingForGraph: Map<Pr
   const visited = new Set<PropertyKey>();
   const queue = [to];
   let head = 0;
-  while (queue.length > 0) {
+  while (head < queue.length) {
     const node = queue[head++];
     if (node === from) {
       return true;
